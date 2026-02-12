@@ -814,14 +814,6 @@ export default function CreateOfferBatch() {
     });
   };
 
-  const addOutcome = (defId) => {
-    updateDef(defId, d => ({ ...d, outcomes: [...d.outcomes, makeOutcome()] }));
-  };
-
-  const removeOutcome = (defId, outcomeIdx) => {
-    updateDef(defId, d => ({ ...d, outcomes: d.outcomes.filter((_, i) => i !== outcomeIdx) }));
-  };
-
   // --- Event helpers ---
   const addEvent = (defId) => {
     updateDef(defId, d => ({ ...d, events: [...d.events, makeEventRule()] }));
@@ -857,25 +849,21 @@ export default function CreateOfferBatch() {
       }
       offerDefinitions.forEach((def) => {
         if (!def.name.trim()) errs[`def_${def.id}_name`] = 'Name is required';
-        if (def.outcomes.length === 0) {
-          errs[`def_${def.id}_outcomes`] = 'At least one outcome is required';
+        const outcome = def.outcomes[0];
+        if (!outcome.type) errs[`def_${def.id}_oc_0_type`] = 'Outcome type is required';
+        const parentType = OUTCOME_TYPES.find(o => o.key === outcome.type);
+        if (parentType?.subTypes) {
+          if (!outcome.subType) errs[`def_${def.id}_oc_0_subType`] = 'Variant is required';
+          if (outcome.subType && (outcome.value === '' || outcome.value === null || outcome.value === undefined)) {
+            errs[`def_${def.id}_oc_0_value`] = 'Value is required';
+          }
         }
-        def.outcomes.forEach((outcome, oi) => {
-          if (!outcome.type) errs[`def_${def.id}_oc_${oi}_type`] = 'Outcome type is required';
-          const parentType = OUTCOME_TYPES.find(o => o.key === outcome.type);
-          if (parentType?.subTypes) {
-            if (!outcome.subType) errs[`def_${def.id}_oc_${oi}_subType`] = 'Variant is required';
-            if (outcome.subType && (outcome.value === '' || outcome.value === null || outcome.value === undefined)) {
-              errs[`def_${def.id}_oc_${oi}_value`] = 'Value is required';
-            }
-          }
-          if (parentType?.inputType === 'smart_tag_picker' && outcome.smartTags.length === 0) {
-            errs[`def_${def.id}_oc_${oi}_value`] = 'Select at least one smart tag';
-          }
-          if (parentType?.inputType === 'merchant_offer_picker' && outcome.merchantOffers.length === 0) {
-            errs[`def_${def.id}_oc_${oi}_value`] = 'Select at least one merchant offer';
-          }
-        });
+        if (parentType?.inputType === 'smart_tag_picker' && outcome.smartTags.length === 0) {
+          errs[`def_${def.id}_oc_0_value`] = 'Select at least one smart tag';
+        }
+        if (parentType?.inputType === 'merchant_offer_picker' && outcome.merchantOffers.length === 0) {
+          errs[`def_${def.id}_oc_0_value`] = 'Select at least one merchant offer';
+        }
         // Event rule validation
         def.events.forEach((evt, ei) => {
           if (!evt.eventType) errs[`def_${def.id}_evt_${ei}_type`] = 'Event type is required';
@@ -980,21 +968,12 @@ export default function CreateOfferBatch() {
 
   // --- Render single outcome block ---
   const renderOutcomeBlock = (def, outcome, outcomeIdx) => {
-    const usedTypes = def.outcomes.map(o => o.type).filter(t => t && t !== outcome.type);
-    const availableTypes = OUTCOME_TYPES.filter(ot => !usedTypes.includes(ot.key));
+    const availableTypes = OUTCOME_TYPES;
     const selectedParent = OUTCOME_TYPES.find(o => o.key === outcome.type);
     const selectedSub = selectedParent?.subTypes?.find(s => s.key === outcome.subType);
 
     return (
       <div key={outcomeIdx} style={{ padding: 16, background: '#f9fafb', borderRadius: 8, marginBottom: 10, border: '1px solid #e5e7eb' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>Outcome {def.outcomes.length > 1 ? outcomeIdx + 1 : ''}</span>
-          {def.outcomes.length > 1 && (
-            <button onClick={() => removeOutcome(def.id, outcomeIdx)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: 2 }} title="Remove outcome">
-              <X size={15} />
-            </button>
-          )}
-        </div>
 
         {/* Parent type dropdown */}
         <div className="form-group" style={{ marginBottom: 12 }}>
@@ -1102,8 +1081,6 @@ export default function CreateOfferBatch() {
   // --- Render single incentive definition card ---
   const renderOfferDefinitionCard = (def, index) => {
     const unusedCriteria = AVAILABLE_CRITERIA.filter(c => !def.criteria.includes(c.key));
-    const usedOutcomeTypes = def.outcomes.map(o => o.type).filter(Boolean);
-    const canAddOutcome = usedOutcomeTypes.length < OUTCOME_TYPES.length;
 
     return (
       <div key={def.id} className="form-section" style={{ position: 'relative' }}>
@@ -1121,13 +1098,11 @@ export default function CreateOfferBatch() {
               <div className="form-section-title" style={{ marginBottom: 0 }}>
                 {def.name || `Incentive Definition ${index + 1}`}
               </div>
-              {def.collapsed && def.outcomes.some(o => o.type) && (
+              {def.collapsed && def.outcomes[0]?.type && (
                 <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 4 }}>
-                  {def.outcomes.filter(o => o.type).map((o, i) => (
-                    <span key={i} style={{ fontSize: 11, padding: '1px 6px', borderRadius: 3, background: '#f3f4f6', color: '#6b7280' }}>
-                      {getOutcomeDisplayLabel(o) || o.type}
-                    </span>
-                  ))}
+                  <span style={{ fontSize: 11, padding: '1px 6px', borderRadius: 3, background: '#f3f4f6', color: '#6b7280' }}>
+                    {getOutcomeDisplayLabel(def.outcomes[0]) || def.outcomes[0].type}
+                  </span>
                 </div>
               )}
             </div>
@@ -1175,57 +1150,70 @@ export default function CreateOfferBatch() {
               {errors[`def_${def.id}_name`] && <span className="form-error">{errors[`def_${def.id}_name`]}</span>}
             </div>
 
-            {/* Eligibility */}
+            {/* Eligibility Criteria — flat list of all filters */}
             <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 16 }}>Eligibility Criteria</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>Eligibility Criteria</div>
+              <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 14 }}>Filter by customer properties, scores, or activity. All filters are AND'd together.</div>
 
-              {/* Customer Attributes subsection */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 4 }}>Customer Attributes</div>
-                <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 10 }}>Filter by customer properties like status, tags, and scores.</div>
+              {/* Render all criteria blocks + event rules as flat siblings with AND between each */}
+              {(() => {
+                const allBlocks = [];
 
-                {def.criteria.map(key => renderCriteriaBlock(def, key))}
+                // Criteria blocks
+                def.criteria.forEach((key) => {
+                  allBlocks.push({ type: 'criteria', key });
+                });
 
-                {unusedCriteria.length > 0 && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: 12, color: '#9ca3af' }}>Add criteria:</span>
-                    {unusedCriteria.map(c => (
-                      <button
-                        key={c.key}
-                        onClick={() => addCriteria(def.id, c.key)}
-                        style={{
-                          display: 'inline-flex', alignItems: 'center', gap: 4,
-                          padding: '5px 12px', borderRadius: 20,
-                          border: '1px dashed #d1d5db', background: 'white',
-                          fontSize: 13, color: '#374151', cursor: 'pointer',
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#374151'; }}
-                      >
-                        <Plus size={13} /> {c.label}
-                      </button>
-                    ))}
+                // Event rules
+                def.events.forEach((rule, ei) => {
+                  allBlocks.push({ type: 'event', index: ei, rule });
+                });
+
+                return allBlocks.map((block, bi) => (
+                  <div key={block.type === 'criteria' ? block.key : `evt_${block.index}`}>
+                    {block.type === 'criteria'
+                      ? renderCriteriaBlock(def, block.key)
+                      : (
+                        <EventRuleCard
+                          rule={block.rule}
+                          index={block.index}
+                          errors={errors}
+                          defId={def.id}
+                          onUpdate={(updated) => updateEvent(def.id, block.index, updated)}
+                          onRemove={() => removeEvent(def.id, block.index)}
+                        />
+                      )
+                    }
+                    {bi < allBlocks.length - 1 && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0' }}>
+                        <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+                        <span style={{ padding: '2px 12px', fontSize: 11, fontWeight: 600, color: '#6b7280', background: '#f3f4f6', borderRadius: 4, letterSpacing: '0.05em' }}>AND</span>
+                        <div style={{ flex: 1, height: 1, background: '#e5e7eb' }} />
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                ));
+              })()}
 
-              {/* Customer Activity subsection */}
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 4 }}>Customer Activity</div>
-                <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 10 }}>Target customers based on events they have performed.</div>
-
-                {def.events.map((rule, ei) => (
-                  <EventRuleCard
-                    key={ei}
-                    rule={rule}
-                    index={ei}
-                    errors={errors}
-                    defId={def.id}
-                    onUpdate={(updated) => updateEvent(def.id, ei, updated)}
-                    onRemove={() => removeEvent(def.id, ei)}
-                  />
+              {/* Add buttons — criteria pills + event button together */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12, color: '#9ca3af' }}>Add filter:</span>
+                {unusedCriteria.map(c => (
+                  <button
+                    key={c.key}
+                    onClick={() => addCriteria(def.id, c.key)}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 4,
+                      padding: '5px 12px', borderRadius: 20,
+                      border: '1px dashed #d1d5db', background: 'white',
+                      fontSize: 13, color: '#374151', cursor: 'pointer',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#374151'; }}
+                  >
+                    <Plus size={13} /> {c.label}
+                  </button>
                 ))}
-
                 <button
                   onClick={() => addEvent(def.id)}
                   style={{
@@ -1233,46 +1221,26 @@ export default function CreateOfferBatch() {
                     padding: '5px 12px', borderRadius: 20,
                     border: '1px dashed #d1d5db', background: 'white',
                     fontSize: 13, color: '#374151', cursor: 'pointer',
-                    marginTop: def.events.length > 0 ? 4 : 0,
                   }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#374151'; }}
                 >
-                  <Plus size={13} /> Add Event
+                  <Plus size={13} /> Event Rule
                 </button>
               </div>
             </div>
 
-            {/* Outcomes */}
+            {/* Outcome */}
             <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 20 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
-                  Outcome Definitions ({def.outcomes.length})
-                </div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 12 }}>
+                Outcome Definition
               </div>
 
               {errors[`def_${def.id}_outcomes`] && (
                 <span className="form-error" style={{ display: 'block', marginBottom: 8 }}>{errors[`def_${def.id}_outcomes`]}</span>
               )}
 
-              {def.outcomes.map((outcome, oi) => renderOutcomeBlock(def, outcome, oi))}
-
-              {canAddOutcome && (
-                <button
-                  onClick={() => addOutcome(def.id)}
-                  style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
-                    padding: '5px 12px', borderRadius: 20,
-                    border: '1px dashed #d1d5db', background: 'white',
-                    fontSize: 13, color: '#374151', cursor: 'pointer',
-                    marginTop: 4,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#2563eb'; e.currentTarget.style.color = '#2563eb'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#d1d5db'; e.currentTarget.style.color = '#374151'; }}
-                >
-                  <Plus size={13} /> Add Outcome
-                </button>
-              )}
+              {renderOutcomeBlock(def, def.outcomes[0], 0)}
             </div>
           </>
         )}
@@ -1451,36 +1419,34 @@ export default function CreateOfferBatch() {
                 </span>
                 {def.name || `Incentive Definition ${index + 1}`}
               </div>
-              {summarizeCriteria(def).length > 0 && (
-                <>
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 6 }}>CUSTOMER ATTRIBUTES</div>
-                  {summarizeCriteria(def).map((line, i) => (
-                    <div key={i} className="offer-summary-row">
-                      <span className="offer-summary-value">{line}</span>
-                    </div>
-                  ))}
-                </>
-              )}
-              {def.events.length > 0 && (
-                <>
-                  {summarizeCriteria(def).length > 0 && <div style={{ height: 1, background: '#f3f4f6', margin: '6px 0' }} />}
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 6 }}>CUSTOMER ACTIVITY</div>
-                  {summarizeEvents(def).map((line, i) => (
-                    <div key={i} className="offer-summary-row">
-                      <span className="offer-summary-value">{line}</span>
-                    </div>
-                  ))}
-                </>
-              )}
+              {(() => {
+                const allLines = [...summarizeCriteria(def), ...summarizeEvents(def)];
+                if (allLines.length === 0) return null;
+                return (
+                  <>
+                    <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 6 }}>ELIGIBILITY</div>
+                    {allLines.map((line, i) => (
+                      <div key={i}>
+                        <div className="offer-summary-row">
+                          <span className="offer-summary-value">{line}</span>
+                        </div>
+                        {i < allLines.length - 1 && (
+                          <div style={{ textAlign: 'center', margin: '2px 0' }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: '#9ca3af', letterSpacing: '0.05em' }}>AND</span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
               <div style={{ height: 1, background: '#e5e7eb', margin: '8px 0' }} />
               <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 6 }}>
-                OUTCOMES ({def.outcomes.length})
+                OUTCOME
               </div>
-              {def.outcomes.map((outcome, oi) => (
-                <div key={oi} className="offer-summary-row">
-                  <span className="offer-summary-value">{summarizeSingleOutcome(outcome)}</span>
-                </div>
-              ))}
+              <div className="offer-summary-row">
+                <span className="offer-summary-value">{summarizeSingleOutcome(def.outcomes[0])}</span>
+              </div>
             </div>
           ))}
         </div>

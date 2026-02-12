@@ -11,6 +11,11 @@ import { format } from 'date-fns';
 export default function OfferBatchDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
+  const [disabledDefs, setDisabledDefs] = useState({});
+
+  const toggleDef = (defId) => {
+    setDisabledDefs(prev => ({ ...prev, [defId]: !prev[defId] }));
+  };
 
   const batch = offerBatches.find(ob => ob.id === id);
   if (!batch) {
@@ -36,51 +41,22 @@ export default function OfferBatchDetail() {
 
   const renderEligibility = (eligibility) => {
     const rows = [];
-    rows.push(
-      <div key="status" className="offer-summary-row">
-        <span className="offer-summary-label">Journey Status</span>
-        <span className="offer-summary-value">{eligibility.journeyStatus}</span>
-      </div>
-    );
+    rows.push({ key: 'status', label: 'Journey Status', value: eligibility.journeyStatus });
 
     if (eligibility.smartTags && eligibility.smartTags.length > 0) {
-      rows.push(
-        <div key="tags" className="offer-summary-row">
-          <span className="offer-summary-label">Smart Tags</span>
-          <span className="offer-summary-value" style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-            {eligibility.smartTags.map((tag, i) => (
-              <span key={i} style={{ padding: '2px 8px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, fontSize: 12, color: '#1d4ed8' }}>{tag}</span>
-            ))}
-          </span>
-        </div>
-      );
+      rows.push({ key: 'tags', label: 'Smart Tags', tags: eligibility.smartTags });
     }
 
     if (eligibility.propensityRange) {
-      rows.push(
-        <div key="propensity" className="offer-summary-row">
-          <span className="offer-summary-label">Propensity Range</span>
-          <span className="offer-summary-value">{eligibility.propensityRange.min} - {eligibility.propensityRange.max}</span>
-        </div>
-      );
+      rows.push({ key: 'propensity', label: 'Propensity Range', value: `${eligibility.propensityRange.min} - ${eligibility.propensityRange.max}` });
     }
 
     if (eligibility.decileRange) {
-      rows.push(
-        <div key="decile" className="offer-summary-row">
-          <span className="offer-summary-label">Decile Range</span>
-          <span className="offer-summary-value">{eligibility.decileRange.min} - {eligibility.decileRange.max}</span>
-        </div>
-      );
+      rows.push({ key: 'decile', label: 'Decile Range', value: `${eligibility.decileRange.min} - ${eligibility.decileRange.max}` });
     }
 
     if (eligibility.currentRoi) {
-      rows.push(
-        <div key="roi" className="offer-summary-row">
-          <span className="offer-summary-label">Current ROI</span>
-          <span className="offer-summary-value">{eligibility.currentRoi.operator} {eligibility.currentRoi.value}%</span>
-        </div>
-      );
+      rows.push({ key: 'roi', label: 'Current ROI', value: `${eligibility.currentRoi.operator} ${eligibility.currentRoi.value}%` });
     }
 
     if (eligibility.events && eligibility.events.length > 0) {
@@ -92,16 +68,31 @@ export default function OfferBatchDetail() {
         if (evt.timeWindow) {
           display += ` within last ${evt.timeWindow.value} ${evt.timeWindow.unit}`;
         }
-        rows.push(
-          <div key={`event_${i}`} className="offer-summary-row">
-            <span className="offer-summary-label">Event Rule {i + 1}</span>
-            <span className="offer-summary-value">{display}</span>
-          </div>
-        );
+        rows.push({ key: `event_${i}`, label: `Event Rule ${i + 1}`, value: display });
       });
     }
 
-    return rows;
+    return rows.map((row, i) => (
+      <div key={row.key}>
+        <div className="offer-summary-row">
+          <span className="offer-summary-label">{row.label}</span>
+          {row.tags ? (
+            <span className="offer-summary-value" style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              {row.tags.map((tag, ti) => (
+                <span key={ti} style={{ padding: '2px 8px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 4, fontSize: 12, color: '#1d4ed8' }}>{tag}</span>
+              ))}
+            </span>
+          ) : (
+            <span className="offer-summary-value">{row.value}</span>
+          )}
+        </div>
+        {i < rows.length - 1 && (
+          <div style={{ textAlign: 'center', margin: '2px 0' }}>
+            <span style={{ fontSize: 10, fontWeight: 600, color: '#9ca3af', letterSpacing: '0.05em' }}>AND</span>
+          </div>
+        )}
+      </div>
+    ));
   };
 
   const getOutcomeLabel = (outcome) => {
@@ -247,22 +238,37 @@ export default function OfferBatchDetail() {
             </div>
 
             {batch.offerDefinitions && batch.offerDefinitions.length > 0 ? (
-              batch.offerDefinitions.map((def, index) => (
-                <div key={def.id} className="offer-summary">
-                  <div className="offer-summary-title">
-                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: '#f3f4f6', fontSize: 11, fontWeight: 600, color: '#6b7280', marginRight: 8 }}>
-                      {index + 1}
-                    </span>
-                    {def.name}
+              batch.offerDefinitions.map((def, index) => {
+                const isDisabled = disabledDefs[def.id];
+                return (
+                  <div key={def.id} className="offer-summary" style={{ opacity: isDisabled ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div className="offer-summary-title" style={{ marginBottom: 0 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 20, height: 20, borderRadius: '50%', background: '#f3f4f6', fontSize: 11, fontWeight: 600, color: '#6b7280', marginRight: 8 }}>
+                          {index + 1}
+                        </span>
+                        {def.name}
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 12, color: isDisabled ? '#dc2626' : '#059669', fontWeight: 500 }}>
+                          {isDisabled ? 'Disabled' : 'Enabled'}
+                        </span>
+                        <button
+                          className={`toggle-switch ${isDisabled ? '' : 'active'}`}
+                          onClick={() => toggleDef(def.id)}
+                          title={isDisabled ? 'Enable definition' : 'Disable definition'}
+                        />
+                      </div>
+                    </div>
+                    {renderEligibility(def.eligibility)}
+                    <div style={{ height: 1, background: '#e5e7eb', margin: '8px 0' }} />
+                    <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>
+                      OUTCOME
+                    </div>
+                    {def.outcomes.map((outcome, oi) => renderOutcome(outcome, oi))}
                   </div>
-                  {renderEligibility(def.eligibility)}
-                  <div style={{ height: 1, background: '#e5e7eb', margin: '8px 0' }} />
-                  <div style={{ fontSize: 12, fontWeight: 500, color: '#6b7280', marginBottom: 4 }}>
-                    OUTCOMES ({def.outcomes.length})
-                  </div>
-                  {def.outcomes.map((outcome, oi) => renderOutcome(outcome, oi))}
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="offer-summary" style={{ textAlign: 'center', color: '#9ca3af' }}>
                 No incentive definitions configured.
