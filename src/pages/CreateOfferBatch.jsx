@@ -752,10 +752,10 @@ function summarizeEvents(def) {
 export default function CreateOfferBatch() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [title, setTitle] = useState('June ROI Reduction Incentive');
+  const [description, setDescription] = useState('Targeted campaign to reduce ROI by offering incentivized credit limit increases to eligible cardholders during June 2025.');
+  const [startDate, setStartDate] = useState('2025-05-12T10:00');
+  const [endDate, setEndDate] = useState('2025-06-10T23:59');
   const [offerDefinitions, setOfferDefinitions] = useState([makeOfferDefinition()]);
   const [errors, setErrors] = useState({});
   const [toast, setToast] = useState(null);
