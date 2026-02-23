@@ -753,7 +753,7 @@ export default function CreateOfferBatch() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState('June ROI Reduction Incentive');
-  const [description, setDescription] = useState('Targeted campaign to reduce ROI by offering incentivized credit limit increases to eligible cardholders during June 2025.');
+  const [description, setDescription] = useState('Targeted sub-batch to reduce ROI by offering incentivized credit limit increases to eligible cardholders during June 2025.');
   const [startDate, setStartDate] = useState('2025-05-12T10:00');
   const [endDate, setEndDate] = useState('2025-06-10T23:59');
   const [offerDefinitions, setOfferDefinitions] = useState([makeOfferDefinition()]);
@@ -888,7 +888,7 @@ export default function CreateOfferBatch() {
   const goBack = () => setStep(s => Math.max(s - 1, 0));
 
   const handleSubmit = () => {
-    setToast('Campaign created successfully!');
+    setToast('Sub-Batch created successfully!');
     setTimeout(() => navigate('/'), 1500);
   };
 
@@ -1255,13 +1255,13 @@ export default function CreateOfferBatch() {
       <Breadcrumb items={[
         { label: 'Journeys', to: '/' },
         { label: 'Credit Limit Increase - Jun 25', to: '/' },
-        { label: 'Create Campaign' },
+        { label: 'Create Sub-Batch' },
       ]} />
 
       <div className="page-header">
         <div className="page-header-left">
-          <h1 className="page-title">Create Campaign</h1>
-          <p className="page-description">Create a new campaign under {baseBatch.title}</p>
+          <h1 className="page-title">Create Sub-Batch</h1>
+          <p className="page-description">Create a new sub-batch under {baseBatch.title}</p>
         </div>
       </div>
 
@@ -1315,7 +1315,7 @@ export default function CreateOfferBatch() {
       {step === 0 && (
         <div className="form-section">
           <div className="form-section-title">Basic Details</div>
-          <div className="form-section-subtitle">Configure the campaign name, description, and duration.</div>
+          <div className="form-section-subtitle">Configure the sub-batch name, description, and duration.</div>
 
           <div className="form-group">
             <label className="form-label">Title <span className="required">*</span></label>
@@ -1326,7 +1326,7 @@ export default function CreateOfferBatch() {
 
           <div className="form-group">
             <label className="form-label">Description</label>
-            <textarea className="form-textarea" placeholder="Describe the purpose of this campaign..." value={description} onChange={e => setDescription(e.target.value)} maxLength={500} />
+            <textarea className="form-textarea" placeholder="Describe the purpose of this sub-batch..." value={description} onChange={e => setDescription(e.target.value)} maxLength={500} />
             <span className="form-hint">{description.length}/500 characters</span>
           </div>
 
@@ -1382,8 +1382,8 @@ export default function CreateOfferBatch() {
       {/* Step 2: Review & Submit */}
       {step === 2 && (
         <div className="form-section">
-          <div className="form-section-title">Review Campaign</div>
-          <div className="form-section-subtitle">Verify all details before creating the campaign.</div>
+          <div className="form-section-title">Review Sub-Batch</div>
+          <div className="form-section-subtitle">Verify all details before creating the sub-batch.</div>
 
           <div style={{ marginTop: 16, marginBottom: 20 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 12 }}>Basic Details</div>
@@ -1470,7 +1470,7 @@ export default function CreateOfferBatch() {
             </button>
           ) : (
             <button className="btn btn-primary" onClick={handleSubmit}>
-              Create Campaign
+              Create Sub-Batch
             </button>
           )}
         </div>

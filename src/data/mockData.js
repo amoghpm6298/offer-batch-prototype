@@ -107,7 +107,7 @@ export const offerBatches = [
   },
   {
     id: 'ob_002',
-    title: 'May PF Waiver Campaign',
+    title: 'May PF Waiver Sub-Batch',
     status: 'EXPIRED',
     startDate: '2025-05-01T00:00:00',
     endDate: '2025-05-14T23:59:59',

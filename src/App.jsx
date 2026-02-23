@@ -8,8 +8,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<BaseBatchView />} />
-        <Route path="/create-campaign" element={<CreateOfferBatch />} />
-        <Route path="/campaign/:id" element={<OfferBatchDetail />} />
+        <Route path="/create-sub-batch" element={<CreateOfferBatch />} />
+        <Route path="/sub-batch/:id" element={<OfferBatchDetail />} />
       </Routes>
     </BrowserRouter>
   );

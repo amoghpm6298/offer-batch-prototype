@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Copy, Pencil, MoreHorizontal, Eye, Tag, ShoppingBag } from 'lucide-react';
+import { Copy, Pencil, MoreHorizontal, Eye, Tag, ShoppingBag, AlertTriangle } from 'lucide-react';
 import Breadcrumb from '../components/Breadcrumb';
 import StatusBadge from '../components/StatusBadge';
 import AnalyticsCards from '../components/AnalyticsCards';
@@ -12,9 +12,22 @@ export default function OfferBatchDetail() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('overview');
   const [disabledDefs, setDisabledDefs] = useState({});
+  const [confirmDisableId, setConfirmDisableId] = useState(null);
 
-  const toggleDef = (defId) => {
-    setDisabledDefs(prev => ({ ...prev, [defId]: !prev[defId] }));
+  const handleToggleClick = (defId) => {
+    if (disabledDefs[defId]) return; // Already disabled — cannot re-enable
+    setConfirmDisableId(defId);
+  };
+
+  const confirmDisable = () => {
+    if (confirmDisableId) {
+      setDisabledDefs(prev => ({ ...prev, [confirmDisableId]: true }));
+      setConfirmDisableId(null);
+    }
+  };
+
+  const cancelDisable = () => {
+    setConfirmDisableId(null);
   };
 
   const batch = offerBatches.find(ob => ob.id === id);
@@ -23,7 +36,7 @@ export default function OfferBatchDetail() {
       <div className="page-container">
         <div className="card" style={{ marginTop: 40 }}>
           <div className="empty-state">
-            <div className="empty-state-title">Campaign not found</div>
+            <div className="empty-state-title">Sub-Batch not found</div>
             <Link to="/">Back to base batch</Link>
           </div>
         </div>
@@ -152,7 +165,7 @@ export default function OfferBatchDetail() {
           <div className="page-title-row">
             <h1 className="page-title">{batch.title}</h1>
           </div>
-          <p className="page-description">Campaign under {baseBatch.title}</p>
+          <p className="page-description">Sub-Batch under {baseBatch.title}</p>
         </div>
         <div className="header-actions">
           <StatusBadge status={batch.status} />
@@ -163,14 +176,14 @@ export default function OfferBatchDetail() {
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Campaign Strategy</button>
+        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Sub-Batch Strategy</button>
       </div>
 
       {activeTab === 'overview' && (
         <>
-          {/* Campaign Details */}
+          {/* Sub-Batch Details */}
           <div className="section">
-            <div className="section-title" style={{ marginBottom: 16 }}>Campaign Details</div>
+            <div className="section-title" style={{ marginBottom: 16 }}>Sub-Batch Details</div>
             <div className="detail-grid">
               <div className="detail-item">
                 <span className="detail-label">Batch ID</span>
@@ -254,9 +267,10 @@ export default function OfferBatchDetail() {
                           {isDisabled ? 'Disabled' : 'Enabled'}
                         </span>
                         <button
-                          className={`toggle-switch ${isDisabled ? '' : 'active'}`}
-                          onClick={() => toggleDef(def.id)}
-                          title={isDisabled ? 'Enable definition' : 'Disable definition'}
+                          className={`toggle-switch ${isDisabled ? '' : 'active'} ${isDisabled ? 'permanently-disabled' : ''}`}
+                          onClick={() => handleToggleClick(def.id)}
+                          title={isDisabled ? 'This definition has been permanently disabled' : 'Disable definition'}
+                          style={isDisabled ? { cursor: 'not-allowed', opacity: 0.5 } : {}}
                         />
                       </div>
                     </div>
@@ -288,8 +302,35 @@ export default function OfferBatchDetail() {
       {activeTab === 'campaign' && (
         <div className="card">
           <div className="empty-state">
-            <div className="empty-state-title">Campaign Strategy</div>
-            <div className="empty-state-desc">Campaign strategy configuration will appear here.</div>
+            <div className="empty-state-title">Sub-Batch Strategy</div>
+            <div className="empty-state-desc">Sub-Batch strategy configuration will appear here.</div>
+          </div>
+        </div>
+      )}
+
+      {/* Disable Confirmation Modal */}
+      {confirmDisableId && (
+        <div className="modal-overlay" onClick={cancelDisable}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-icon-wrapper">
+              <AlertTriangle size={28} color="#dc2626" />
+            </div>
+            <h3 className="modal-title">Disable Incentive Definition?</h3>
+            <p className="modal-description">
+              This action is <strong>irreversible</strong>. Once disabled, this incentive definition cannot be
+              enabled again. Disabling will stop this definition from being applied to any future eligible customers.
+            </p>
+            <p className="modal-description" style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>
+              Re-enabling is not supported because backtracing previously applied incentives would be operationally complex and error-prone.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={cancelDisable}>
+                Cancel
+              </button>
+              <button className="btn btn-danger" onClick={confirmDisable}>
+                Disable Permanently
+              </button>
+            </div>
           </div>
         </div>
       )}

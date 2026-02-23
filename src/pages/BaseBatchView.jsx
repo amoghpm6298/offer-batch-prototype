@@ -47,7 +47,7 @@ export default function BaseBatchView() {
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Campaign Strategy</button>
+        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Sub-Batch Strategy</button>
       </div>
 
       {activeTab === 'overview' && (
@@ -113,13 +113,13 @@ export default function BaseBatchView() {
             </div>
           </div>
 
-          {/* Campaigns Section */}
+          {/* Sub-Batches Section */}
           <div className="section">
             <div className="section-header">
-              <span className="section-title">Campaigns</span>
-              <Link to="/create-campaign" style={{ textDecoration: 'none' }}>
+              <span className="section-title">Sub-Batches</span>
+              <Link to="/create-sub-batch" style={{ textDecoration: 'none' }}>
                 <button className="btn btn-primary btn-sm">
-                  <Plus size={15} /> Create Campaign
+                  <Plus size={15} /> Create Sub-Batch
                 </button>
               </Link>
             </div>
@@ -129,7 +129,7 @@ export default function BaseBatchView() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Campaign Title</th>
+                      <th>Sub-Batch Title</th>
                       <th>Status</th>
                       <th>Duration</th>
                       <th>Eligible Customers</th>
@@ -140,7 +140,7 @@ export default function BaseBatchView() {
                   </thead>
                   <tbody>
                     {offerBatches.map((ob) => (
-                      <tr key={ob.id} onClick={() => navigate(`/campaign/${ob.id}`)}>
+                      <tr key={ob.id} onClick={() => navigate(`/sub-batch/${ob.id}`)}>
                         <td className="table-link">{ob.title}</td>
                         <td><span className={`status-badge status-${ob.status}`}>{ob.status.charAt(0) + ob.status.slice(1).toLowerCase()}</span></td>
                         <td style={{ fontSize: 12 }}>{formatDate(ob.startDate)} → {formatDate(ob.endDate)}</td>
@@ -169,10 +169,10 @@ export default function BaseBatchView() {
             ) : (
               <div className="card">
                 <div className="empty-state">
-                  <div className="empty-state-title">No campaigns yet</div>
-                  <div className="empty-state-desc">Create your first campaign to run promotional incentives for this journey.</div>
-                  <Link to="/create-campaign" style={{ textDecoration: 'none' }}>
-                    <button className="btn btn-primary btn-sm"><Plus size={15} /> Create Campaign</button>
+                  <div className="empty-state-title">No sub-batches yet</div>
+                  <div className="empty-state-desc">Create your first sub-batch to run promotional incentives for this journey.</div>
+                  <Link to="/create-sub-batch" style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-primary btn-sm"><Plus size={15} /> Create Sub-Batch</button>
                   </Link>
                 </div>
               </div>
@@ -191,8 +191,8 @@ export default function BaseBatchView() {
       {activeTab === 'campaign' && (
         <div className="card">
           <div className="empty-state">
-            <div className="empty-state-title">Campaign Strategy</div>
-            <div className="empty-state-desc">Campaign strategy configuration will appear here.</div>
+            <div className="empty-state-title">Sub-Batch Strategy</div>
+            <div className="empty-state-desc">Sub-Batch strategy configuration will appear here.</div>
           </div>
         </div>
       )}
