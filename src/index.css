@@ -223,9 +223,23 @@ a:hover {
 }
 
 .tab.active {
-  color: #111827;
+  color: #2563eb;
   font-weight: 500;
-  border-bottom-color: #111827;
+  border-bottom-color: #2563eb;
+}
+
+/* Detail page sections (Figma-style with border separator) */
+.detail-section {
+  margin-bottom: 32px;
+}
+
+.detail-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 20px;
 }
 
 /* Sections */
@@ -323,21 +337,15 @@ a:hover {
 .analytics-cards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0;
+  gap: 12px;
   margin-bottom: 28px;
 }
 
 .analytics-card {
-  padding: 20px 24px;
-  border-right: 1px solid #e5e7eb;
-}
-
-.analytics-card:first-child {
-  padding-left: 0;
-}
-
-.analytics-card:last-child {
-  border-right: none;
+  padding: 16px 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
 }
 
 .analytics-card-label {
@@ -704,13 +712,16 @@ tbody tr:hover td {
 
 .offer-summary-row {
   display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
+  align-items: baseline;
+  gap: 16px;
+  padding: 6px 0;
   font-size: 13px;
 }
 
 .offer-summary-label {
   color: #6b7280;
+  width: 160px;
+  flex-shrink: 0;
 }
 
 .offer-summary-value {

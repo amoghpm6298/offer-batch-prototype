@@ -5,7 +5,7 @@ import Breadcrumb from '../components/Breadcrumb';
 import StatusBadge from '../components/StatusBadge';
 import AnalyticsCards from '../components/AnalyticsCards';
 import FunnelChart from '../components/FunnelChart';
-import { baseBatch, offerBatches } from '../data/mockData';
+import { baseBatch, incentives } from '../data/mockData';
 import { format } from 'date-fns';
 
 export default function BaseBatchView() {
@@ -47,14 +47,14 @@ export default function BaseBatchView() {
       {/* Tabs */}
       <div className="tabs">
         <button className={`tab ${activeTab === 'overview' ? 'active' : ''}`} onClick={() => setActiveTab('overview')}>Overview</button>
-        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Sub-Batch Strategy</button>
+        <button className={`tab ${activeTab === 'campaign' ? 'active' : ''}`} onClick={() => setActiveTab('campaign')}>Campaign Strategy</button>
       </div>
 
       {activeTab === 'overview' && (
         <>
           {/* Journey Details */}
-          <div className="section">
-            <div className="section-title" style={{ marginBottom: 16 }}>Journey Details</div>
+          <div className="detail-section">
+            <div className="detail-section-title">Journey Details</div>
             <div className="detail-grid">
               <div className="detail-item">
                 <span className="detail-label">Batch ID</span>
@@ -88,14 +88,14 @@ export default function BaseBatchView() {
           </div>
 
           {/* Batch Details */}
-          <div className="section">
-            <div className="section-header">
-              <span className="section-title">Batch Details</span>
+          <div className="detail-section">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb', marginBottom: 20 }}>
+              <span style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}>Batch Details</span>
               <button className="section-edit-btn"><Pencil size={14} /></button>
             </div>
             <div className="detail-grid">
               <div className="detail-item">
-                <span className="detail-label">Batch Start Date</span>
+                <span className="detail-label">Batch Duration</span>
                 <span className="detail-value">{baseBatch.startDate} → {baseBatch.endDate}</span>
               </div>
               <div className="detail-item">
@@ -113,54 +113,50 @@ export default function BaseBatchView() {
             </div>
           </div>
 
-          {/* Sub-Batches Section */}
-          <div className="section">
-            <div className="section-header">
-              <span className="section-title">Sub-Batches</span>
-              <Link to="/create-sub-batch" style={{ textDecoration: 'none' }}>
+          {/* Incentives Section */}
+          <div className="detail-section">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: 12, borderBottom: '1px solid #e5e7eb', marginBottom: 20 }}>
+              <span style={{ fontSize: 16, fontWeight: 600, color: '#111827' }}>Incentives</span>
+              <Link to="/create-incentive" style={{ textDecoration: 'none' }}>
                 <button className="btn btn-primary btn-sm">
-                  <Plus size={15} /> Create Sub-Batch
+                  <Plus size={15} /> Create Incentive
                 </button>
               </Link>
             </div>
 
-            {offerBatches.length > 0 ? (
+            {incentives.length > 0 ? (
               <div className="table-container">
                 <table>
                   <thead>
                     <tr>
-                      <th>Sub-Batch Title</th>
+                      <th>Incentive Title</th>
                       <th>Status</th>
                       <th>Duration</th>
                       <th>Eligible Customers</th>
-                      <th>Incentives</th>
+                      <th>Outcome</th>
                       <th>Created By</th>
                       <th>Created At</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {offerBatches.map((ob) => (
-                      <tr key={ob.id} onClick={() => navigate(`/sub-batch/${ob.id}`)}>
-                        <td className="table-link">{ob.title}</td>
-                        <td><span className={`status-badge status-${ob.status}`}>{ob.status.charAt(0) + ob.status.slice(1).toLowerCase()}</span></td>
-                        <td style={{ fontSize: 12 }}>{formatDate(ob.startDate)} → {formatDate(ob.endDate)}</td>
-                        <td>{ob.eligibleCustomers.toLocaleString()}</td>
+                    {incentives.map((inc) => (
+                      <tr key={inc.id} onClick={() => navigate(`/incentive/${inc.id}`)}>
+                        <td className="table-link">{inc.title}</td>
+                        <td><span className={`status-badge status-${inc.status}`}>{inc.status.charAt(0) + inc.status.slice(1).toLowerCase()}</span></td>
+                        <td style={{ fontSize: 12 }}>{formatDate(inc.startDate)} → {formatDate(inc.endDate)}</td>
+                        <td>{inc.eligibleCustomers.toLocaleString()}</td>
                         <td>
-                          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                            {(ob.offerDefinitions || []).map((def) => (
-                              <span key={def.id} style={{
-                                padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500,
-                                background: '#f5f3ff',
-                                color: '#6d28d9',
-                                border: '1px solid #ddd6fe',
-                              }}>
-                                {def.name} ({def.outcomes.length})
-                              </span>
-                            ))}
-                          </div>
+                          <span style={{
+                            padding: '2px 8px', borderRadius: 4, fontSize: 11, fontWeight: 500,
+                            background: '#f5f3ff',
+                            color: '#6d28d9',
+                            border: '1px solid #ddd6fe',
+                          }}>
+                            {inc.outcome.label || inc.outcome.type}
+                          </span>
                         </td>
-                        <td>{ob.createdBy}</td>
-                        <td style={{ fontSize: 12 }}>{formatDate(ob.createdAt)}</td>
+                        <td>{inc.createdBy}</td>
+                        <td style={{ fontSize: 12 }}>{formatDate(inc.createdAt)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -169,10 +165,10 @@ export default function BaseBatchView() {
             ) : (
               <div className="card">
                 <div className="empty-state">
-                  <div className="empty-state-title">No sub-batches yet</div>
-                  <div className="empty-state-desc">Create your first sub-batch to run promotional incentives for this journey.</div>
-                  <Link to="/create-sub-batch" style={{ textDecoration: 'none' }}>
-                    <button className="btn btn-primary btn-sm"><Plus size={15} /> Create Sub-Batch</button>
+                  <div className="empty-state-title">No incentives yet</div>
+                  <div className="empty-state-desc">Create your first incentive to run promotional offers for this journey.</div>
+                  <Link to="/create-incentive" style={{ textDecoration: 'none' }}>
+                    <button className="btn btn-primary btn-sm"><Plus size={15} /> Create Incentive</button>
                   </Link>
                 </div>
               </div>
@@ -180,8 +176,8 @@ export default function BaseBatchView() {
           </div>
 
           {/* Analytics */}
-          <div className="section">
-            <div className="section-title" style={{ marginBottom: 16 }}>Analytics</div>
+          <div className="detail-section">
+            <div className="detail-section-title">Analytics</div>
             <AnalyticsCards analytics={baseBatch.analytics} />
             <FunnelChart data={baseBatch.funnel} />
           </div>
@@ -191,8 +187,8 @@ export default function BaseBatchView() {
       {activeTab === 'campaign' && (
         <div className="card">
           <div className="empty-state">
-            <div className="empty-state-title">Sub-Batch Strategy</div>
-            <div className="empty-state-desc">Sub-Batch strategy configuration will appear here.</div>
+            <div className="empty-state-title">Campaign Strategy</div>
+            <div className="empty-state-desc">Campaign strategy configuration will appear here.</div>
           </div>
         </div>
       )}

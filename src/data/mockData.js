@@ -28,9 +28,9 @@ export const baseBatch = {
   ],
 };
 
-export const offerBatches = [
+export const incentives = [
   {
-    id: 'ob_001',
+    id: 'inc_001',
     title: 'June ROI Reduction Offer',
     status: 'ACTIVE',
     startDate: '2025-05-15T00:00:00',
@@ -38,6 +38,8 @@ export const offerBatches = [
     eligibleCustomers: 12450,
     createdBy: 'Amogh P.',
     createdAt: '2025-05-10T14:30:00',
+    lastUpdatedBy: 'Amogh P.',
+    lastUpdatedAt: '2025-05-20T11:45:00',
     analytics: {
       finalBatchData: 12450,
       conversions: 1890,
@@ -50,70 +52,75 @@ export const offerBatches = [
       { name: 'Completed Journey', value: 3100 },
       { name: 'Attempted OTP Verification', value: 1890 },
     ],
-    offerDefinitions: [
-      {
-        id: 'od_1',
-        name: 'ROI Reduction + PF Waiver',
-        eligibility: {
-          journeyStatus: 'NOT_STARTED',
-          smartTags: ['High Value Customers', 'Premium Card Holders'],
-          propensityRange: { min: 1, max: 5 },
-          currentRoi: { operator: 'GT', value: 12 },
-          events: [
-            {
-              eventType: 'click',
-              eventTarget: 'Review Details',
-              frequency: { operator: 'GTE', value: 2 },
-              timeWindow: { value: 7, unit: 'days' },
-            },
-          ],
+    eligibility: {
+      journeyStatus: 'NOT_STARTED',
+      smartTags: ['High Value Customers', 'Premium Card Holders'],
+      propensityRange: { min: 1, max: 5 },
+      currentRoi: { operator: 'GT', value: 12 },
+      events: [
+        {
+          eventType: 'click',
+          eventTarget: 'Review Details',
+          frequency: { operator: 'GTE', value: 2 },
+          timeWindow: { value: 7, unit: 'days' },
         },
-        outcomes: [
-          {
-            type: 'roi',
-            subType: 'relative',
-            label: 'ROI \u2014 Relative',
-            value: 1,
-            display: 'Current ROI - 1%',
-          },
-          {
-            type: 'pf',
-            subType: 'flat',
-            label: 'Processing Fee \u2014 Flat',
-            value: 0,
-            display: 'Rs 0',
-          },
-        ],
-      },
-      {
-        id: 'od_2',
-        name: 'Tag High-Intent',
-        eligibility: {
-          journeyStatus: 'NOT_STARTED',
-          smartTags: ['High Value Customers'],
-          decileRange: { min: 0, max: 2 },
-        },
-        outcomes: [
-          {
-            type: 'smart_tag',
-            label: 'Attach Smart Tag',
-            value: null,
-            display: 'Premium Offer Eligible',
-            smartTags: ['Premium Offer Eligible'],
-          },
-        ],
-      },
-    ],
+      ],
+    },
+    outcome: {
+      type: 'roi',
+      subType: 'relative',
+      label: 'ROI — Relative',
+      value: 1,
+      display: 'Current ROI - 1%',
+    },
   },
   {
-    id: 'ob_002',
-    title: 'May PF Waiver Sub-Batch',
+    id: 'inc_002',
+    title: 'June High-Intent Tagging',
+    status: 'ACTIVE',
+    startDate: '2025-05-15T00:00:00',
+    endDate: '2025-05-31T23:59:59',
+    eligibleCustomers: 5100,
+    createdBy: 'Amogh P.',
+    createdAt: '2025-05-10T15:00:00',
+    lastUpdatedBy: 'Rahul S.',
+    lastUpdatedAt: '2025-05-18T09:30:00',
+    analytics: {
+      finalBatchData: 5100,
+      conversions: 780,
+      conversionRate: 15.29,
+      daysToJourneyEnd: 8,
+    },
+    funnel: [
+      { name: 'Total Customers', value: 5100 },
+      { name: 'Visited Landing Page', value: 2600 },
+      { name: 'Completed Journey', value: 1300 },
+      { name: 'Attempted OTP Verification', value: 780 },
+    ],
+    eligibility: {
+      journeyStatus: 'NOT_STARTED',
+      smartTags: ['High Value Customers'],
+      decileRange: { min: 0, max: 2 },
+    },
+    outcome: {
+      type: 'merchant_offer',
+      label: 'Merchant Offer',
+      value: null,
+      display: 'Swiggy 20% Off, Amazon Pay Cashback',
+      merchantOffers: ['Swiggy 20% Off', 'Amazon Pay Cashback'],
+    },
+  },
+  {
+    id: 'inc_003',
+    title: 'May PF Waiver',
     status: 'EXPIRED',
     startDate: '2025-05-01T00:00:00',
     endDate: '2025-05-14T23:59:59',
     eligibleCustomers: 8320,
     createdBy: 'Rahul S.',
     createdAt: '2025-04-28T10:15:00',
+    lastUpdatedBy: 'Rahul S.',
+    lastUpdatedAt: '2025-05-14T16:00:00',
     analytics: {
       finalBatchData: 8320,
       conversions: 1245,
@@ -126,35 +133,29 @@ export const offerBatches = [
       { name: 'Completed Journey', value: 2050 },
       { name: 'Attempted OTP Verification', value: 1245 },
     ],
-    offerDefinitions: [
-      {
-        id: 'od_1',
-        name: 'PF Waiver',
-        eligibility: {
-          journeyStatus: 'NOT_STARTED',
-          decileRange: { min: 0, max: 3 },
-        },
-        outcomes: [
-          {
-            type: 'pf',
-            subType: 'flat',
-            label: 'Processing Fee \u2014 Flat',
-            value: 0,
-            display: 'Rs 0',
-          },
-        ],
-      },
-    ],
+    eligibility: {
+      journeyStatus: 'NOT_STARTED',
+      decileRange: { min: 0, max: 3 },
+    },
+    outcome: {
+      type: 'pf',
+      subType: 'flat',
+      label: 'Processing Fee — Flat',
+      value: 0,
+      display: 'Rs 0',
+    },
   },
   {
-    id: 'ob_003',
-    title: 'June Premium Incentive Bundle',
+    id: 'inc_004',
+    title: 'June Premium ROI Override',
     status: 'SCHEDULED',
     startDate: '2025-06-01T00:00:00',
     endDate: '2025-06-10T23:59:59',
     eligibleCustomers: 0,
     createdBy: 'Amogh P.',
     createdAt: '2025-05-25T09:00:00',
+    lastUpdatedBy: 'Amogh P.',
+    lastUpdatedAt: '2025-05-25T09:00:00',
     analytics: {
       finalBatchData: 0,
       conversions: 0,
@@ -167,52 +168,30 @@ export const offerBatches = [
       { name: 'Completed Journey', value: 0 },
       { name: 'Attempted OTP Verification', value: 0 },
     ],
-    offerDefinitions: [
-      {
-        id: 'od_1',
-        name: 'ROI Override + Merchant Reward',
-        eligibility: {
-          journeyStatus: 'NOT_STARTED',
-          propensityRange: { min: 1, max: 3 },
-          events: [
-            {
-              eventType: 'page_view',
-              eventTarget: 'Offer Summary',
-              frequency: { operator: 'GTE', value: 3 },
-              timeWindow: { value: 14, unit: 'days' },
-            },
-            {
-              eventType: 'cta_tap',
-              eventTarget: 'Apply Now',
-              frequency: null,
-              timeWindow: { value: 2, unit: 'weeks' },
-            },
-          ],
+    eligibility: {
+      journeyStatus: 'NOT_STARTED',
+      propensityRange: { min: 1, max: 3 },
+      events: [
+        {
+          eventType: 'page_view',
+          eventTarget: 'Offer Summary',
+          frequency: { operator: 'GTE', value: 3 },
+          timeWindow: { value: 14, unit: 'days' },
         },
-        outcomes: [
-          {
-            type: 'roi',
-            subType: 'absolute',
-            label: 'ROI \u2014 Absolute',
-            value: 10,
-            display: '10%',
-          },
-          {
-            type: 'merchant_offer',
-            label: 'Merchant Offer',
-            value: null,
-            display: 'Amazon - 10% Cashback, Swiggy - 20% Off',
-            merchantOffers: ['Amazon - 10% Cashback', 'Swiggy - 20% Off'],
-          },
-          {
-            type: 'smart_tag',
-            label: 'Attach Smart Tag',
-            value: null,
-            display: 'Premium Offer Eligible',
-            smartTags: ['Premium Offer Eligible'],
-          },
-        ],
-      },
-    ],
+        {
+          eventType: 'cta_tap',
+          eventTarget: 'Apply Now',
+          frequency: null,
+          timeWindow: { value: 2, unit: 'weeks' },
+        },
+      ],
+    },
+    outcome: {
+      type: 'roi',
+      subType: 'absolute',
+      label: 'ROI — Absolute',
+      value: 10,
+      display: '10%',
+    },
   },
 ];
