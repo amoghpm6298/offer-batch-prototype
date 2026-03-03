@@ -47,6 +47,62 @@ These fields must be synced from the data warehouse into the application databas
 
 ---
 
+## 3.1 Journey Variant Compatibility
+
+### Problem
+
+Incentives are backend-configured, but their visibility depends on the journey frontend supporting that outcome type. Different issuers have different journey variants — issuer-1's variant might render Processing Fee on the frontend, but issuer-2's variant might not. If an admin creates a PF incentive for issuer-2, the incentive gets applied on the backend but the customer never sees it communicated — defeating the purpose of driving conversion through visible offers.
+
+Additionally, journey variables (e.g., ROI, PF, Decile, Propensity) are not universal. A "Custom" journey type can have variants with completely different variable sets, so constraining variables at the journey type level doesn't work.
+
+### Design
+
+Both layers of compatibility are defined **per journey variant** (not per journey type):
+
+| Layer | Field | Purpose | Effect on Create Form |
+|---|---|---|---|
+| **Variables** | `variables` | Data variables applicable to this variant (filters + outcomes) | Hard constraint — options not in `variables` are hidden entirely |
+| **Frontend Support** | `frontendSupported` | Subset of `variables` that the variant's UI actually renders | Soft warning — option is visible but flagged with a warning |
+
+`frontendSupported` is always a subset of `variables`. You can't display something on the frontend that isn't a variable for that variant.
+
+### Example Configuration
+
+```
+Journey Variant: "CLI - Dark Theme"
+  journeyType: "Credit Limit Increase"
+  variables: [roi, pf, proc_charge, decile, propensity]
+  frontendSupported: [roi, pf, merchant_offer]
+
+Journey Variant: "CLI - Issuer 2"
+  journeyType: "Credit Limit Increase"
+  variables: [roi, proc_charge, decile, propensity]
+  frontendSupported: [roi, merchant_offer]
+
+Journey Variant: "Custom - Rewards Upgrade"
+  journeyType: "Custom"
+  variables: [merchant_offer, decile]
+  frontendSupported: [merchant_offer]
+```
+
+### Behavior at Incentive Creation
+
+1. **Fetch journey variant config** from the base batch's assigned variant.
+2. **Filter the create form**: Only show eligibility filters and outcome types that exist in `variables`. If `pf` is not in `variables`, the Processing Fee outcome type and any PF-related filters don't appear.
+3. **Warn on frontend gap**: If the admin selects an outcome type that is in `variables` but not in `frontendSupported`, show a soft warning:
+   > _"This journey variant does not currently display {outcome type} offers. The incentive will be applied on the backend but won't be visible to customers on the frontend."_
+
+Warning (not hard block) because:
+- Journey frontends evolve — support may be added soon
+- Some issuers may want silent backend benefits as a strategy
+- Hard blocks create friction when ops teams know what they're doing
+
+### Maintenance
+
+When a frontend dev adds support for a new variable in a variant, they add it to `frontendSupported` — no journey type config change needed, no cross-variant impact.
+
+---
+
 ## 4. Incentive Structure — Mindmap
 
 This section provides a visual overview of the entire incentive creation model: first the **generic, extensible structure** (all possible configurations), then the **current requirement as a specific instantiation** of that structure.
@@ -532,6 +588,7 @@ The following items from the original PRD or planned features are **not yet impl
 | Cancel incentive action | Not implemented | CANCELLED status exists but no cancel action in UI. |
 | Override ROI > 0% validation | Not implemented | No computation-time validation of resulting offer values. |
 | Override PF >= 0 validation | Not implemented | No computation-time validation of resulting offer values. |
+| Journey variant compatibility | Not implemented | `variables` and `frontendSupported` fields on journey variant config. Create form filtering and soft warnings. See Section 3.1. |
 
 ---
 
@@ -570,6 +627,11 @@ The following items from the original PRD or planned features are **not yet impl
 ## Appendix C: Data Model Summary
 
 ```
+Journey Variant
+  ├── id, name, journeyType
+  ├── variables: string[]          // e.g. ['roi', 'pf', 'decile', 'propensity']
+  └── frontendSupported: string[]  // subset of variables rendered on frontend
+
 Base Batch
   ├── id, title, description, tag, status, type
   ├── journeyType, journeyVariant, issuer, genericUrls
