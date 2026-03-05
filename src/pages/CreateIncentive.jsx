@@ -1118,7 +1118,7 @@ export default function CreateIncentive() {
           {/* Eligibility Criteria */}
           <div style={{ marginBottom: 28 }}>
             <div style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 6 }}>Eligibility Criteria</div>
-            <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 16 }}>Filter by customer properties, scores, or activity. All filters are AND'd together.</div>
+            <div style={{ fontSize: 12, color: '#9ca3af', marginBottom: 16 }}>These filters will be applied with the base batch cohort as the starting set. All filters are AND'd together.</div>
 
             {/* Render all criteria blocks + event rules as flat siblings with AND between each */}
             {(() => {

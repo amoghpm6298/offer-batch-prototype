@@ -343,6 +343,7 @@ export default function IncentiveDetail() {
         {/* Eligibility Criteria */}
         <div className="detail-section">
           <div className="detail-section-title">Eligibility Criteria</div>
+          <p style={{ fontSize: 12, color: '#9ca3af', margin: '4px 0 16px' }}>These filters will be applied with the base batch cohort as the starting set.</p>
           <div className="offer-summary">
             {renderEligibility(incentive.eligibility)}
           </div>
