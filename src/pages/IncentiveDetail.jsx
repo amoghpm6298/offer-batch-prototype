@@ -212,7 +212,7 @@ export default function IncentiveDetail() {
     <div className="page-container">
       <Breadcrumb items={[
         { label: 'Journeys', to: '/' },
-        { label: 'Credit Limit Increase - Jun 25', to: '/' },
+        { label: 'OS to EMI - Jun 25', to: '/' },
         { label: incentive.title },
       ]} />
 

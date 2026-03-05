@@ -724,7 +724,7 @@ export default function CreateIncentive() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [title, setTitle] = useState('June ROI Reduction Incentive');
-  const [description, setDescription] = useState('Targeted incentive to reduce ROI by offering incentivized credit limit increases to eligible cardholders during June 2025.');
+  const [description, setDescription] = useState('Targeted incentive to reduce ROI by offering incentivized OS to EMI conversions to eligible cardholders during June 2025.');
   const [startDate, setStartDate] = useState('2025-05-12T10:00');
   const [endDate, setEndDate] = useState('2025-06-10T23:59');
   const [definition, setDefinition] = useState(makeDefinition());
@@ -1009,7 +1009,7 @@ export default function CreateIncentive() {
     <div className="page-container">
       <Breadcrumb items={[
         { label: 'Journeys', to: '/' },
-        { label: 'Credit Limit Increase - Jun 25', to: '/' },
+        { label: 'OS to EMI - Jun 25', to: '/' },
         { label: 'Create Incentive' },
       ]} />
 
